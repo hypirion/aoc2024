@@ -49,21 +49,21 @@ plot_sides = moves
 
 def sides(grp):
   sseen = set()
-  corners = 0
+  ccs = 0
   for (y, x) in grp:
     for (dy, dx) in moves:
       if (y+dy, x+dx) in grp:
         continue
       # n = outside, d = outside "side"
-      # find corner:
+      # find 'canonical' corner side
       cy, cx = y, x
       while (cy+dx, cx+dy) in grp and (cy+dy, cx+dx) not in grp:
           cy += dx
           cx += dy
       if (cy, cx, dy, dx) not in sseen:
         sseen.add((cy, cx, dy, dx))
-        corners += 1
-  return corners
+        ccs += 1
+  return ccs
 
 
 seen = set()
