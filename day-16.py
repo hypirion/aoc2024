@@ -25,47 +25,51 @@ for y, line in enumerate(grid):
       goal = (y, x)
 
 def backtrack(prevs, goal):
-  cur = [goal]
+  to_check = [(goal, delta) for delta in moves]
   seen = set()
-  while cur:
-    loc = cur.pop()
-    if loc in seen:
+  while to_check:
+    cur = to_check.pop()
+    if cur in seen:
       continue
-    seen.add(loc)
-    cur.extend(list(prevs[loc]))
-  return seen
+    seen.add(cur)
+    to_check.extend(list(prevs[cur]))
+
+  locs = set(loc for loc, _ in seen)
+  return locs
 
 def dijkstra(start, goal):
   seen = defaultdict(lambda: 1e80)
   prevs = defaultdict(set)
-  cur = [(0, start, (0, 1), start)]
+  fst = (start, (0, 1))
+  heap = [(0, fst, None)]
   best = float('Inf')
 
-  while cur:
-    cost, loc, delta, prev = heappop(cur)
+  while heap:
+    cost, cur, prev = heappop(heap)
+    loc, delta = cur
     if best < cost:
       break
-    if seen[(loc, delta)] < cost:
+    if seen[cur] < cost:
       continue
-    if seen[(loc, delta)] == cost and loc != prev:
-      prevs[loc].add(prev)
+    if seen[cur] == cost and prev:
+      prevs[cur].add(prev)
       continue
     if loc == goal:
       best = cost
-      prevs[loc].add(prev)
+      prevs[cur].add(prev)
       continue
 
-    seen[(loc, delta)] = cost
-    if loc != prev:
-      prevs[loc].add(prev)
+    seen[cur] = cost
+    if prev:
+      prevs[cur].add(prev)
 
     y, x = loc
     dy, dx = delta
     nloc = (y+dy, x+dx)
     if nloc not in walls:
-      heappush(cur, (cost+1, nloc, delta, loc))
+      heappush(heap, (cost+1, (nloc, delta), cur))
     for ndelta in rot90s(delta):
-      heappush(cur, (cost+1000, loc, ndelta, loc))
+      heappush(heap, (cost+1000, (loc, ndelta), cur))
 
   return best, backtrack(prevs, goal)
 
