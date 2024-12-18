@@ -22,9 +22,6 @@ class Program:
   def copy(p):
     return Program(p.r[:], p.p, p.out[:])
 
-  def step(p):
-    pass
-
   def lit(p):
     return p.p[p.ip+1]
 
