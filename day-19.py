@@ -13,7 +13,7 @@ def count(goal):
   for end in range(1, len(goal)+1):
     for cand in pats:
       start = end - len(cand)
-      if len(cand) < 0:
+      if start < 0:
         continue
       if goal[start:end] == cand:
         dp[end] += dp[start]
