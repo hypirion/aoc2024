@@ -40,70 +40,7 @@ def bfs(w, s, g):
     steps += 1
   return dist
 
-def count_savings(steps, w):
-  wy, wx = w
-  # multiple? in theory..
-  improvement = 0
-  ret = []
-  for dy, dx in moves:
-    prev = wy + dy, wx + dx
-    if prev in steps:
-      prev_n = steps[prev]
-      nxt = wy - dy, wx - dx
-      if nxt in steps:
-        nxt_n = steps[nxt]
-        if 0 < nxt_n - prev_n - 2:
-          # more than one?
-          ret.append(nxt_n - prev_n -2)
-  return ret
-
-def on_border(wz):
-  wy, wx = wz
-  return wy == 0 or wy == h-1 or wx == 0 or wx == w-1
-
-# 2 picos, but no 2 wall skip example??
-# must move in same loc apparently
-
-to_count = 100
-
-def part1():
-  steps = bfs(walls, start, goal)
-  initial = steps[goal]
-  #  res = Counter()
-  #  for w in walls:
-  #    if on_border(w):
-  #      continue
-  #    wy, wx = w
-  #    walls.discard(w)
-  #    stepss = bfs(walls, start, goal)[goal]
-  #    if initial-stepss:
-  #      res[initial-stepss] += 1
-  #    for dy, dx in moves:
-  #      # todo
-  #      continue
-  #      w2 = wy + dy, wx + dx
-  #      has_wall = w2 in walls
-  #      walls.discard(w2)
-  #      stepss = bfs(walls, start, goal)[goal]
-  #      res[initial-stepss] += 1
-  #
-  #      if has_wall:
-  #        walls.add(w2)
-  #    walls.add(w)
-  #
-  res = Counter()
-  for w in walls:
-    for saving in count_savings(steps, w):
-      res[saving] += 1
-
-  tot = 0
-  for k, v in res.items():
-    if to_count <= k:
-      tot += v
-
-  return tot
-
-def count_savings2(steps, start, n):
+def count_savings(steps, start, n):
   start_n = steps[start]
   cur = [start]
   seen = set(cur)
@@ -126,11 +63,11 @@ def count_savings2(steps, start, n):
     cur = nxt
   return ret
 
-def part2():
+def solve(cheat_dist):
   steps = bfs(walls, start, goal)
   res = Counter()
   for loc in steps.keys():
-    for saving in count_savings2(steps, loc, 19):
+    for saving in count_savings(steps, loc, cheat_dist-1):
       res[saving] += 1
 
   tot = 0
@@ -141,6 +78,12 @@ def part2():
   return tot
 
 to_count = 100
+
+def part1():
+  return(solve(2))
+
+def part2():
+  return(solve(20))
 
 print(part1())
 print(part2())
