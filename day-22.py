@@ -2,67 +2,58 @@
 
 import sys
 from collections import defaultdict
-# import networkx as nx # couldn't get max_clique to work??
-from functools import cache
 
-lines = sys.stdin.read().strip().split('\n')
-conns = defaultdict(set)
-nodes = set()
-for line in lines:
-  a, b = line.split('-')
-  nodes.add(a)
-  nodes.add(b)
-  conns[a].add(b)
-  conns[b].add(a)
+secrets = list(map(int,sys.stdin.read().strip().split('\n')))
 
-def directly_connected():
-  opts = set()
-  for root in nodes:
-    for child1 in conns[root]:
-      for child2 in conns[child1]:
-        if child2 in conns[root]:
-          opts.add(frozenset([root, child1, child2]))
-  return opts
+def rng(val):
+  v1 = val << 6
+  val = (val ^ v1) % 16777216
+  v2 = val >> 5
+  val = (val ^ v2) % 16777216
+  v3 = val << 11
+  val = (val ^ v3) % 16777216
+  return val
 
+def bananas(val):
+  return val % 10
 
 def part1():
-  ts = 0
-  for st in directly_connected():
-    for x in st:
-      if x[0] == 't':
-        ts += 1
-        break
-  return ts
+  tot = 0
+  for sec in secrets:
+    cur = sec
+    for i in range(2000):
+      cur = rng(cur)
+    tot += cur
+  return tot
 
-@cache
-def clique_rec(st, n):
-  best = st
-  opts = conns[n]
-  if st.issubset(opts):
-    st |= frozenset([n])
-    best = st
-    for opt in opts:
-      if opt in st:
-        continue
-      candidate = clique_rec(st, opt)
-      if len(best) < len(candidate):
-        best = candidate
-  return best
-
-def max_clique():
-  best = frozenset()
-  for n in nodes:
-    candidate = clique_rec(frozenset(), n)
-    if len(best) < len(candidate):
-      best = candidate
-  return best
+def banana_mapping(seed):
+  deltas = []
+  cur = seed
+  m = {}
+  for i in range(2000):
+    nxt = rng(cur)
+    delta = bananas(nxt) - bananas(cur)
+    deltas.append(delta)
+    if len(deltas) == 4:
+      d = tuple(deltas)
+      if d not in m:
+        m[tuple(deltas)] = bananas(nxt)
+      deltas.pop(0)
+    cur = nxt
+  return m
 
 def part2():
-  return ','.join(sorted(max_clique()))
+  m = defaultdict(int)
+  for bm in map(banana_mapping, secrets):
+    for k, v in bm.items():
+      m[k] += v
+  best = None
+  best_cnt = 0
+  for k, v in m.items():
+    if best_cnt < v:
+      best_cnt = v
+      best = k
+  return best_cnt
 
 print(part1())
-# time to kill the computer
 print(part2())
-
-
-#exit(1) # remove to run on data.in
